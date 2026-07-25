@@ -1,0 +1,9 @@
+[project]
+name = "pyspark-labs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "==3.10.20"
+dependencies = [
+    "pyspark[sql]==4.0.1",
+]
