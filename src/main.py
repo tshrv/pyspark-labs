@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from random import randint
 
 from faker import Faker
@@ -50,12 +51,19 @@ df = spark.createDataFrame([
 df.show()
 
 # Write to s3
-file_path = 's3a://pyspark-labs/foo.csv'
+# same for parquet, csv and orc formats
+timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M")
+# file_path = f's3a://pyspark-labs/user-data-{timestamp}.csv'
+# file_path = f's3a://pyspark-labs/user-data-{timestamp}.parquet'
+file_path = f's3a://pyspark-labs/user-data-{timestamp}.orc'
+
 print("***************************************************")
 print("Writing data to S3...")
 print("***************************************************")
 
-df.write.csv(file_path, header=True, mode='overwrite')
+# df.write.csv(file_path, header=True, mode='overwrite')
+# df.write.parquet(file_path, mode='overwrite')
+df.write.orc(file_path, mode='overwrite')
 print("***************************************************")
 print("Writing data to S3 complete...")
 print("***************************************************")
@@ -68,7 +76,9 @@ print("***************************************************")
 print("Reading from S3...")
 print("***************************************************")
 
-rdf = spark.read.csv(file_path, header=True, multiLine=True, escape='"')
+# rdf = spark.read.csv(file_path, header=True, multiLine=True, escape='"')
+# rdf = spark.read.parquet(file_path)
+rdf = spark.read.orc(file_path)
 rdf.show()
 
 print("***************************************************")
@@ -76,5 +86,3 @@ print("Reading from S3 complete...")
 print("***************************************************")
 
 # spark.stop()
-
-# can also do the same with `.parquet` and `.orc` files
