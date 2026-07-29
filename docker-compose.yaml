@@ -109,3 +109,26 @@ services:
       --conf spark.driver.host=pyspark-labs-app
       main.py
     restart: "no"
+  
+  stream_processor_app:
+    image: apache-spark:4.0.1
+    container_name: pyspark-labs-stream-processor-app
+    hostname: pyspark-labs-stream-processor-app
+    depends_on:
+      spark-master:
+        condition: service_started
+      spark-worker-1:
+        condition: service_started
+      spark-worker-2:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./src:/app
+    working_dir: /app
+    command: >
+      /opt/spark/bin/spark-submit
+      --master spark://spark-master:7077
+      --conf spark.driver.host=pyspark-labs-stream-processor-app
+      stream_processor.py
+    restart: "no"
