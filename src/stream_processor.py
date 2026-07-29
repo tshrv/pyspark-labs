@@ -1,5 +1,7 @@
 """
 This module intends to process streaming data using spark
+
+Delivering end-to-end exactly-once semantics was one of key goals behind the design of Structured Streaming
 """
 
 from pyspark.sql import SparkSession
@@ -34,11 +36,28 @@ words = lines.select(
 wordCounts = words.groupBy("word").count()
 
 # Start running the query that prints the running counts to the console
+# output modes: complete, append, update
+
+# query = wordCounts \
+#     .writeStream \
+#     .outputMode("complete") \
+#     .format("console") \
+#     .start()
+
 query = wordCounts \
     .writeStream \
-    .outputMode("complete") \
+    .outputMode("update") \
     .format("console") \
     .start()
+
+# query = wordCounts \
+#     .writeStream \
+#     .outputMode("append") \
+#     .format("console") \
+#     .start()
+# append mode raises AnalysisException in this case. This output mode is not supported for streaming aggregations without watermark on streaming DataFrames/DataSets
+
+# more on query modes https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#output-modes
 
 query.awaitTermination() # prevent the process from exiting while the query is active
 
